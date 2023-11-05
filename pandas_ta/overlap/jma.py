@@ -19,12 +19,12 @@ def jma(close, length=None, phase=None, offset=None, **kwargs):
     if close is None: return
 
     # Define base variables
-    jma = npZeroslike(close)
-    volty = npZeroslike(close)
-    v_sum = npZeroslike(close)
+    jma = npZeroslike(close.to_numpy())  # Convert to NumPy array for direct indexing
+    volty = npZeroslike(close.to_numpy())
+    v_sum = npZeroslike(close.to_numpy())
 
     kv = det0 = det1 = ma2 = 0.0
-    jma[0] = ma1 = uBand = lBand = close[0]
+    jma[0] = ma1 = uBand = lBand = close.iloc[0]  # Use .iloc for positional indexing
 
     # Static variables
     sum_length = 10
@@ -38,7 +38,7 @@ def jma(close, length=None, phase=None, offset=None, **kwargs):
 
     m = close.shape[0]
     for i in range(1, m):
-        price = close[i]
+        price = close.iloc[i]  # Use .iloc for positional indexing
 
         # Price volatility
         del1 = price - uBand

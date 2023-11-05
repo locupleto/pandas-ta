@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from pandas_ta.utils import get_offset, verify_series
+import pandas as pd
 
 
 def mcgd(close, length=None, offset=None, c=None, **kwargs):
@@ -21,7 +22,7 @@ def mcgd(close, length=None, offset=None, c=None, **kwargs):
         return series.iloc[1]
 
     mcg_cell = close[0:].rolling(2, min_periods=2).apply(mcg_, raw=False)
-    mcg_ds = close[:1].append(mcg_cell[1:])
+    mcg_ds = pd.concat([close[:1], mcg_cell[1:]], ignore_index=True)
 
     # Offset
     if offset != 0:

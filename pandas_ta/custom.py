@@ -114,10 +114,10 @@ def import_dir(path, verbose=True):
             fcn_callable = module_functions.get(module_name, None)
             fcn_method_callable = module_functions.get(f"{module_name}_method", None)
 
-            if fcn_callable == None:
+            if fcn_callable is None:
                 print(f"[X] Unable to find a function named '{module_name}' in the module '{module_name}.py'.")
                 continue
-            if fcn_method_callable == None:
+            if fcn_method_callable is None:
                 missing_method = f"{module_name}_method"
                 print(f"[X] Unable to find a method function named '{missing_method}' in the module '{module_name}.py'.")
                 continue
@@ -224,3 +224,4 @@ def load_indicator_module(name):
     # reload to refresh previously loaded module
     module = importlib.reload(module)
     return get_module_functions(module)
+    

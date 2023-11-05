@@ -11,7 +11,7 @@ from numpy import log10 as npLog10
 from numpy import ndarray as npNdarray
 from pandas.core.base import PandasObject
 
-from pandas_ta import Category, Imports, version
+from pandas_ta import Imports, version
 from pandas_ta.candles.cdl_pattern import ALL_PATTERNS
 from pandas_ta.candles import *
 from pandas_ta.cycles import *
@@ -338,6 +338,7 @@ class AnalysisIndicators(BasePandasObject):
     @property
     def categories(self) -> str:
         """Returns the categories."""
+        from pandas_ta import Category
         return list(Category.keys())
 
     @property
@@ -457,6 +458,7 @@ class AnalysisIndicators(BasePandasObject):
 
     def _indicators_by_category(self, name: str) -> list:
         """Returns indicators by Categorical name."""
+        from pandas_ta import Category
         return Category[name] if name in self.categories else None
 
     def _mp_worker(self, arguments: tuple):
@@ -1456,6 +1458,11 @@ class AnalysisIndicators(BasePandasObject):
             return self._df
         else:
             result = long_run(fast=fast, slow=slow, length=length, offset=offset, **kwargs)
+            return self._post_process(result, **kwargs)
+        
+    def ni(self, length=None, offset=None, **kwargs):
+            close = self._get_column(kwargs.pop("close", "close"))
+            result = ni(close=close, length=length, offset=offset, **kwargs)
             return self._post_process(result, **kwargs)
 
     def psar(self, af0=None, af=None, max_af=None, offset=None, **kwargs):
