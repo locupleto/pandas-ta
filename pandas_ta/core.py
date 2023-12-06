@@ -1279,6 +1279,16 @@ class AnalysisIndicators(object):
         result = rma(close=close, length=length, offset=offset, **kwargs)
         return self._post_process(result, **kwargs)
 
+    def rwd(self, min_length=8, max_length=65, bars_per_year=252, smooth_type='ezls', smooth_length=3, smooth_gain=6, offset=None, **kwargs):
+        high = self._get_column(kwargs.pop("high", "high"))
+        low = self._get_column(kwargs.pop("low", "low"))
+        close = self._get_column(kwargs.pop("close", "close"))
+        result = rwd(high=high, low=low, close=close, min_length=min_length, max_length=max_length, bars_per_year=bars_per_year, smooth_type=smooth_type, smooth_length=smooth_length, smooth_gain=smooth_gain, **kwargs)
+        if offset is not None:
+            result = result.shift(offset)
+        return self._post_process(result, **kwargs)
+
+    
     def rwi(self, length=None, offset=None, **kwargs):
         close = self._get_column(kwargs.pop("close", "close"))
         result = rwi(high=high, low=low, close=close, length=length, offset=offset, **kwargs)
