@@ -9,7 +9,7 @@ categories = DataFrame().ta.categories() + \
 [pytest.param(ta.CommonStudy, id="common"), pytest.param(ta.AllStudy, id="all")]
 
 # +/- when adding/removing indicators
-ALL_COLUMNS = 321
+ALL_COLUMNS = 323
 
 
 def test_all_study_props(all_study):
@@ -31,8 +31,8 @@ def test_common_study_props(common_study):
 
 
 @pytest.mark.parametrize("category,columns", [
-    ("candles", 70), ("cycles", 2), ("momentum", 77), ("overlap", 56),
-    ("performance", 2), ("statistics", 16), ("transform", 5), ("trend", 29),
+    ("candles", 70), ("cycles", 2), ("momentum", 78), ("overlap", 56),
+    ("performance", 2), ("statistics", 16), ("transform", 5), ("trend", 30),
     ("volatility", 36), ("volume", 28),
     pytest.param(ta.AllStudy, ALL_COLUMNS, id=f"all-{ALL_COLUMNS}"),
     pytest.param(ta.CommonStudy, 5, id="common-5"),
@@ -52,35 +52,35 @@ def test_study_category_talib(df, category, talib):
 
 
 @pytest.mark.parametrize("talib", [False, True])
-def test_study_custom_a(df, custom_study_a, talib):
+def test_study_custom_a_talib(df, custom_study_a, talib):
     initial_columns = df.shape[1]
     df.ta.study(custom_study_a, cores=0, talib=talib)
     assert df.shape[1] > initial_columns
 
 
 @pytest.mark.parametrize("talib", [False, True])
-def test_study_custom_b(df, custom_study_b, talib):
+def test_study_custom_b_talib(df, custom_study_b, talib):
     initial_columns = df.shape[1]
     df.ta.study(custom_study_b, cores=0, talib=talib)
     assert df.shape[1] - initial_columns == 3
 
 
 @pytest.mark.parametrize("talib", [False, True])
-def test_study_custom_c(df, custom_study_c, talib):
+def test_study_custom_c_talib(df, custom_study_c, talib):
     initial_columns = df.shape[1]
     df.ta.study(custom_study_c, cores=0, talib=talib)
     assert df.shape[1] - initial_columns == 5
 
 
 @pytest.mark.parametrize("talib", [False, True])
-def test_study_custom_d(df, custom_study_d, talib):
+def test_study_custom_d_talib(df, custom_study_d, talib):
     initial_columns = df.shape[1]
     df.ta.study(custom_study_d, cores=0, talib=talib)
     assert df.shape[1] - initial_columns == 3
 
 
 @pytest.mark.parametrize("talib", [False, True])
-def test_study_custom_e(df, custom_study_e, talib):
+def test_study_custom_e_talib(df, custom_study_e, talib):
     initial_columns = df.shape[1]
     df.ta.study(custom_study_e, cores=0, talib=talib)
     df.ta.tsignals(trend=df["AMATe_LR_20_50_2"], append=True)
@@ -88,18 +88,20 @@ def test_study_custom_e(df, custom_study_e, talib):
 
 
 @pytest.mark.parametrize("talib", [False, True])
-def test_study_all_multirun(df, all_study, talib):
-    all_columns = 608  # +/- when adding/removing indicators
+def test_study_all_multirun_talib(df, all_study, talib):
+    new_columns = 612  # +/- when adding/removing indicators
     initial_columns = df.shape[1]
     df.ta.study(all_study, length=10, cores=0, talib=talib)
     df.ta.study(all_study, length=50, cores=0, talib=talib)
     df.ta.study(all_study, fast=5, slow=10, cores=0, talib=talib)
 
-    assert df.shape[1] - initial_columns == all_columns
+    assert df.shape[1] == new_columns + initial_columns
 
 
+# Note: As expected, it will print a VWAP datetime ordered index warning
+# when less than 2 rows
 @pytest.mark.parametrize("talib", [False, True])
-def test_study_all_incremental_rows(df, all_study, talib):
+def test_study_all_incremental_rows_talib(df, all_study, talib):
     MAX_ROWS = 90
     df = df.iloc[:MAX_ROWS]   # Trim for this test
 

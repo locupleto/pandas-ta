@@ -669,6 +669,8 @@ class AnalysisIndicators(object):
                 # based on total ta indicators
                 if mp_chunksize > _total_ta:
                     _chunksize = mp_chunksize - 1
+                elif mp_chunksize > 0:
+                    _chunksize = mp_chunksize
                 else:
                     _chunksize = int(log10(_total_ta)) + 1
                 if verbose:
@@ -685,20 +687,21 @@ class AnalysisIndicators(object):
                     # Custom multiprocessing pool. Must be ordered for Chained Strategies
                     # May fix this to cpus if Chaining/Composition if it remains
                     if Imports["tqdm"] and verbose:
-                        results = tqdm(pool.map(self._mp_worker, custom_ta, _chunksize))
+                        results = tqdm(pool.map(self._mp_worker, custom_ta, _chunksize), total=len(custom_ta) // _chunksize)
                     else:
                         results = pool.map(self._mp_worker, custom_ta, _chunksize)
                 else:
                     default_ta = [(ind, tuple(), kwargs) for ind in ta]
+                    tqdm_total = len(default_ta) // _chunksize
                     # All and Categorical multiprocessing pool.
                     if all_ordered:
                         if Imports["tqdm"] and verbose:
-                            results = tqdm(pool.imap(self._mp_worker, default_ta, _chunksize)) # Order over Speed
+                            results = tqdm(pool.imap(self._mp_worker, default_ta, _chunksize), total=tqdm_total) # Order over Speed
                         else:
                             results = pool.imap(self._mp_worker, default_ta, _chunksize) # Order over Speed
                     else:
                         if Imports["tqdm"] and verbose:
-                            results = tqdm(pool.imap_unordered(self._mp_worker, default_ta, _chunksize)) # Speed over Order
+                            results = tqdm(pool.imap_unordered(self._mp_worker, default_ta, _chunksize), total=tqdm_total) # Speed over Order
                         else:
                             results = pool.imap_unordered(self._mp_worker, default_ta, _chunksize) # Speed over Order
                 if results is None:
@@ -941,6 +944,12 @@ class AnalysisIndicators(object):
         result = coppock(close=close, length=length, fast=fast, slow=slow, offset=offset, **kwargs)
         return self._post_process(result, **kwargs)
 
+    def crsi(self, length_rsi=None, length_streak=None, length_rank=None,
+    drift=None, offset=None, **kwargs: DictLike):
+        close = self._get_column(kwargs.pop("close", "close"))
+        result = crsi(close=close, length_rsi=length_rsi, length_streak=length_streak, length_rank=length_rank, drift=drift, offset=offset, **kwargs)
+        return self._post_process(result, **kwargs)
+
     def cti(self, length=None, offset=None, **kwargs: DictLike):
         close = self._get_column(kwargs.pop("close", "close"))
         result = cti(close=close, length=length, offset=offset, **kwargs)
@@ -1122,7 +1131,7 @@ class AnalysisIndicators(object):
         close = self._get_column(kwargs.pop("close", "close"))
         result = tmo(open_=open_, close=close, tmo_length=tmo_length, calc_length=calc_length, smooth_length=smooth_length, mamode=mamode, compute_momentum=compute_momentum, normalize_signal=normalize_signal, offset=offset, **kwargs)
         return self._post_process(result, **kwargs)
- 
+
     def trix(self, length=None, signal=None, scalar=None, drift=None, offset=None, **kwargs: DictLike):
         close = self._get_column(kwargs.pop("close", "close"))
         result = trix(close=close, length=length, signal=signal, scalar=scalar, drift=drift, offset=offset, **kwargs)
