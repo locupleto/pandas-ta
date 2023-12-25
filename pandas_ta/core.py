@@ -1756,6 +1756,19 @@ class AnalysisIndicators(object):
         result = aobv(close=close, volume=volume, fast=fast, slow=slow, mamode=mamode, max_lookback=max_lookback,
                       min_lookback=min_lookback, offset=offset, **kwargs)
         return self._post_process(result, **kwargs)
+    
+    def avwap(self, left_strength=None, right_strength=None, bands=None, offset=None, **kwargs):
+        # Use self._get_column to fetch individual columns
+        close = self._get_column(kwargs.pop("close", "close"))
+        high = self._get_column(kwargs.pop("high", "high"))
+        low = self._get_column(kwargs.pop("low", "low"))
+        volume = self._get_column(kwargs.pop("volume", "volume"))
+
+        # Call the avwap function
+        result = avwap(high=high, low=low, close=close, volume=volume, 
+                       left_strength=left_strength, right_strength=right_strength, 
+                       bands=bands, offset=offset, **kwargs)
+        return self._post_process(result, **kwargs)
 
     def cmf(self, open_=None, length=None, offset=None, **kwargs: DictLike):
         if open_ is not None:

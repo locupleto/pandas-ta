@@ -2,6 +2,7 @@
 from .ad import ad
 from .adosc import adosc
 from .aobv import aobv
+from .avwap import avwap
 from .cmf import cmf
 from .efi import efi
 from .eom import eom
@@ -24,6 +25,7 @@ __all__ = [
     "ad",
     "adosc",
     "aobv",
+    "avwap",
     "cmf",
     "efi",
     "eom",
