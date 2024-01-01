@@ -1,6 +1,6 @@
 import pandas as pd
 from pandas import DataFrame, Series, Timedelta
-from pandas_ta.utils import v_datetime_ordered, v_series, v_offset
+from pandas_ta.utils import v_series
 from typing import Optional, List
 
 def anchored_vwap(df, start_date, end_date) -> float:
@@ -142,3 +142,8 @@ def pivot(data: Series, left_strength: int, right_strength: int, pivot_type: str
             pivots.append(data.index[i])
     return pivots
 
+def rolling_standardize(series, window):
+    """ Apply rolling standardization """
+    rolling_mean = series.rolling(window=window).mean()
+    rolling_std = series.rolling(window=window).std()
+    return (series - rolling_mean) / rolling_std

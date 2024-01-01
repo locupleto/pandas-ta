@@ -25,7 +25,7 @@ import sys
 import matplotlib.pyplot as plt
 import numpy as np
 from marketdata.database import Database
-from pandas_ta.volume.avwap import pivot, anchored_vwap
+from pandas_ta.volume.avwap import pivot, anchored_vwap, rolling_standardize
 
 # pip install pandas
 import pandas as pd  
@@ -144,8 +144,9 @@ class MyTests(unittest.TestCase):
     def test_avwap_osc(self):
         # Load your stock data into a DataFrame
         df = self.df.tail(200)
-        left_strength = 10
+        left_strength = 5
         right_strength = 5
+        window = 50
 
         # Apply the avwap function
         df = df.ta.avwap(high=df['high'], low=df['low'], close=df['close'],
@@ -168,17 +169,21 @@ class MyTests(unittest.TestCase):
             if index in pivot_high_indices:
                 anchored_vwap_values_high = row['AVWAP_HIGH']
             if pivot_high_indices and index >= min(pivot_high_indices):
-                avwap_high_values[df.index.get_loc(index)] = anchored_vwap_values_high - price #if price < anchored_vwap_values_high else 0
+                avwap_high_values[df.index.get_loc(index)] = anchored_vwap_values_high - price 
 
             # Calculate AVWAP_LOW oscillator
             if index in pivot_low_indices:
                 anchored_vwap_values_low = row['AVWAP_LOW']
             if pivot_low_indices and index >= min(pivot_low_indices):
-                avwap_low_values[df.index.get_loc(index)] = price - anchored_vwap_values_low #if price > anchored_vwap_values_low else 0
+                avwap_low_values[df.index.get_loc(index)] =  anchored_vwap_values_low - price 
 
-        # Add oscillator values to the DataFrame
-        df['AVWAP_LOW_Oscillator'] = avwap_low_values
-        df['AVWAP_HIGH_Oscillator'] = avwap_high_values
+        # Calculate relative oscillator values
+        df['AVWAP_LOW_Oscillator'] = ((df['AVWAP_LOW'] - df['close']) / df['close']).astype(float)
+        df['AVWAP_HIGH_Oscillator'] = ((df['AVWAP_HIGH'] - df['close']) / df['close']).astype(float)
+
+        # Normalize the oscillator values
+        df['AVWAP_LOW_Oscillator_Norm'] = rolling_standardize(df['AVWAP_LOW_Oscillator'], window)
+        df['AVWAP_HIGH_Oscillator_Norm'] = rolling_standardize(df['AVWAP_HIGH_Oscillator'], window)
 
         # Plotting
         plt.figure(figsize=(12, 6))
@@ -191,8 +196,8 @@ class MyTests(unittest.TestCase):
         plt.grid(True)
 
         plt.subplot(2, 1, 2)
-        plt.plot(df.index, df['AVWAP_LOW_Oscillator'], label='AVWAP Low Oscillator', color='green')
-        plt.plot(df.index, df['AVWAP_HIGH_Oscillator'], label='AVWAP High Oscillator', color='red')
+        plt.plot(df.index, df['AVWAP_LOW_Oscillator_Norm'], label='AVWAP Low Oscillator', color='green')
+        plt.plot(df.index, df['AVWAP_HIGH_Oscillator_Norm'], label='AVWAP High Oscillator', color='red')
         plt.title('AVWAP Oscillator')
         plt.xlabel('Date')
         plt.ylabel('Oscillator Value')
@@ -201,6 +206,9 @@ class MyTests(unittest.TestCase):
 
         plt.tight_layout()
         plt.show()
+
+        stats = df[['AVWAP_LOW_Oscillator_Norm', 'AVWAP_HIGH_Oscillator_Norm']].describe()
+        print(stats)
 
         # Save the DataFrame to a CSV file
         df.to_csv('/Users/urban/Desktop/test_avwap_osc.csv')
